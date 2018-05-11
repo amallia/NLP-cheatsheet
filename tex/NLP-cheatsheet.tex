@@ -132,8 +132,37 @@ The simplest strategy uses a bag-of-words model. We create lists of 'positive' a
 
 Creating such lists is not easy; some of the words are likely to be quite different for different kinds of topics. As an alternative, we will take a collection of documents on some topic and rate them (by hand) as positive or negative. We will then use this collection to train a classifier model.
 
+$
+c = argmax_{c \in C} P(c) \prod_{i \in positions} P(w_i | c)	 
+$ \\
+
+$P(c) = \frac{count(\text{docs labeled t})}{N}$ \\
+
+$P(w_i | c) = \frac{count(\text{docs labeled t containing } w_i)}{count(\text{docs labeled t})}$
+
+\textbf{Smoothing}: $P(w_i | c) = \frac{count(w_i, c) + 1}{(\sum_{w \in V} count(w,c)) + |V|}$ \\
+
+The bag-of-words strategy with NB model does quite well for short reviews, but fails for:
+\begin{itemize}
+	\item ambiguous terms
+	\item negation
+	\item comparative reviews
+	\item revealing aspects of an opinion
+\end{itemize}
 
 
+\section{English sentence structure and context-free grammar}
+\section{Parsing}
+\section{POS tagging}
+\section{HMMs and the Viterbi decoder}
+\section{Chunkers and name taggers}
+\section{Maximum entropy}
+\section{Lexical semantics and word sense disambiguation}
+\section{Probabilistic CFG}
+\section{Learning}
+\section{Reference resolution}
+\section{Question Answering}
+\section{Machine translation}
 
 \rule{0.3\linewidth}{0.25pt}
 \scriptsize

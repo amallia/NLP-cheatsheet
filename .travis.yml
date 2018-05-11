@@ -1,0 +1,17 @@
+before_install:
+- sudo apt-get update
+- sudo apt-get install texlive-latex-recommended texlive-latex-extra texlive-fonts-recommended
+script:
+- cd tex
+- mkdir _build
+- pdflatex -output-directory _build ./NLP-cheatsheet.tex
+deploy:
+  provider: releases
+  api_key:
+    secure: llNwbFeAAPo0gTX/Osv3s2CayGPMQ/vBU/RJvruAwARYunvoFMAo+OrcEXh1hnTVCSAQ1fGWZRrJv7cupQeJEFoS025AWTim/+m6fMPMR9uFzXlQE9Fw6U7TTKCg54NehalTbbXK3KQXpMHWW1v+wVZof7f2ZcyRZNXXJNOWCw8nwb3ZL0SRWXgumlQV9EMRAnp9od6f0J+n9JQ2kllXaIqBkXjMUtNkX3kT3a1fY3/JBS5SHZ2gyojdQq+YL8+fALs6rWU+NMv8JwJM/2BEENbkAtQYKmOpigEijS+2swlg34UDOF485822YJD8sE6Ck5JtzP7ILBkn0lxLGzsAWavU2rfOSfrkbKVwqhi54lHHyqzwEGku3Iq/3ORPz9x8m15iSbvryyROXGl3amBqaAcFZdLg3a6hFTeAIixJCCpPF7QDY/WRCMs5gRSHNv/AJyEHgvOz7grAFGcnQifzJJ3aGste2bJtd2FonpsKgl+l5bFUrwQ5ar1fHG6bvJ6Z0hTjl0gAqV7pn2G2eadWCErqUQs4/8b5F9jVm8hJdNiI1XqsCC4+wEXoceYA4gb6DWftBv99yEM8rELH7+ex6XcsOQyWx82+i4tuG6dzWGJwu4Bh4ibvekl3mDQtX8haC3gkmYlU+hhaXacS8w7+toccvylp2SiLFdZf5WHv/us=
+  file:
+    - ./_build/NLP-cheatsheet.pdf
+  skip_cleanup: true
+  on:
+    tags: true
+    branch: master

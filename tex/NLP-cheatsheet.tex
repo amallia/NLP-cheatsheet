@@ -151,9 +151,33 @@ The bag-of-words strategy with NB model does quite well for short reviews, but f
 \end{itemize}
 
 
-\section{English sentence structure and context-free grammar}
+\section{Context-free grammar}
+A context-free grammar consists of:
+\begin{itemize}
+	\item a set of non-terminal symbols $A, B, C, \dots \in N$
+	\item a set of terminal symbols $a, b, c, \dots \in T$
+	\item a start symbol $S \in N$
+	\item – a set of productions $P$ of the form $N \rightarrow (N U T)*$
+\end{itemize}
+CFG can be used to generate sentences, recognize sentences or parse sentences.
+
 \section{Parsing}
 \subsection{The CKY algorithm}
+The	grammar	has	to	be	in	\textbf{Chomsky	normal form (CNF)}. Every production must have the form $A \rightarrow B C$ or $A \rightarrow a$.
+
+\begin{itemize}
+	\item Use a parse table $PT[i,j]$
+	\begin{itemize}
+		\item each entry is a list of grammar symbols
+		\item $PT[i,j]$ includes $x$ if the words from $i$ up to (but not including) $j$ can be analyzed as an $x$
+		\end{itemize}		
+
+	\item Two steps
+		\begin{itemize}
+		\item if there is a rule $A \rightarrow a$ and word $i$ is an $a$, put an $A$ in $PT[i, i+1]$
+		\item if there is a rule $A \rightarrow B C$, $PT[i,j]$ includes $A$ and $PT[j,k]$ includes $B$, add $C$ to $PT[i,k]$
+		\end{itemize}		
+\end{itemize}
 
 
 
@@ -162,12 +186,78 @@ Space complexity = $O(n^2)$
 
 \section{POS tagging}
 \section{HMMs and the Viterbi decoder}
+HMM is a Weighted Finite-state Automaton (WFSA)
+\begin{itemize}
+	\item Each transition arc is associated with a probability
+	\item The sum of all arcs outgoing from a single node is 1
+\end{itemize}
+
+Viterbi decoder's time complexity is $O(s^2 n)$ and the space complexity is $O(s n)$ for $s$ states and $n$ words.
+
+$viterbi[s, t] = max_{s'}( viterbi[s', t-1] \times p(s, s') \times P (token[t] | s) )$
+
+for each $s, t$: record which $s’, t-1$ contributed the maximum.
+
 \section{Chunkers and name taggers}
 \section{Maximum entropy}
 \section{Lexical semantics and word sense disambiguation}
 \section{Probabilistic CFG}
 \section{Learning}
 \section{Reference resolution}
+Identify all phrases which refer to the same real-word entity.
+
+\subsection{Terminology}
+
+Referent: real world object referred to 
+
+Referring expression [mention]: a phrase referring to that object
+
+Coreference: two expressions referring to the same thing.
+
+Antecedent: prior expression
+
+Anaphor: following expression
+
+Types of referring expressions: definite pronouns (he, she, it), indefinite pronouns (one), definite NPs (the car), indefinite NPs (a car).
+
+Cataphora: pronoun referring to a following mention
+
+Bridging Anaphora: reference to related object
+
+Zero Anaphora: many languages allow subject omission, and some allow omission of other arguments
+
+Non-NP Anaphora: pronouns can also refer to events or propositions
+
+Wikification: entity linking, so map each document-level entity to an entry in a standard database as Wikipedia
+
+
+\subsection{Hobbs search}
+In selecting which sentences to search, Hobbs starts with the sentence containing the anaphor and then selects prior sentences from right to left, examining first the immediately preceding sentence.
+However, within an individual sentence he searches from left to right;  this is the way he captures the preference for antecedents in subject position.
+The resulting search order defines a Hobbs distance:  if in searching for antecedents of $X$ the $d-th$ candidate we consider is $Y$, we say that the Hobbs distance from $X$ to $Y$ is $d$.
+
+\subsection{Constraints}
+\begin{itemize}
+	\item animacy
+	\item gender
+	\item number
+\end{itemize}
+
+\subsection{Preferences}
+\begin{itemize}
+	\item recent: at most 3 sentences back
+	\item salient: mentioned several times recently
+	\item subjects: 
+\end{itemize}
+
+
+Ge, Hale, and Charniak formula:
+$P = P1( correct antecedent is at(Hobbs distance d) \times 
+P2( pronoun | head of antecedent) \times
+P3( antecedent | mention count) \times
+P4( head of antecedent | context of pronoun ) $
+
+
 \section{Question Answering}
 \subsection{Mean Reciprocal Rank}
 Typically for evaluations QA systems generate a ranked set of answers to each query and are scored based on the rank of the first correct answer:  mean reciprocal rank

@@ -185,6 +185,28 @@ Time complexity = $O(n^3)$ \\
 Space complexity = $O(n^2)$
 
 \section{POS tagging}
+
+\subsection{Accuracy}
+ for part-of-speech tagging, accuracy is a simple and reasonable metric.
+ 
+ $accuracy = \frac{\text{tokens with correct tag}}{total tokens}$
+\subsection{Precision and recall}
+
+Instead of counting the tags themselves, we count the names defined by these tags: 
+key = number of names in key 
+response = number of names in system response
+correct = number of names in response which exactly match (in type and extent) a name in the key
+
+$precision = correct / response$ \\
+$recall = correct / key$ \\
+Also
+$precision = \text{True Positives} / (\text{True Positives} + \text{False Positives})$ \\
+$recall = \text{True Positives} / (\text{True Positives} + \text{False Negatives})$
+
+\textbf{F-measure}: the harmonic mean of 
+recall and precision.
+$F = 2 \times \frac{precision \times recall}{precision + recall}$
+
 \section{HMMs and the Viterbi decoder}
 HMM is a Weighted Finite-state Automaton (WFSA)
 \begin{itemize}
@@ -199,10 +221,114 @@ $viterbi[s, t] = max_{s'}( viterbi[s', t-1] \times p(s, s') \times P (token[t] |
 for each $s, t$: record which $s’, t-1$ contributed the maximum.
 
 \section{Chunkers and name taggers}
+
+\subsection{BIO (IOB) tags}
+
+$I \rightarrow \text{inside a baseNP}$ \\ 
+$O \rightarrow \text{outside a baseNP}$ \\
+$B \rightarrow \text{start of a baseNP which follows another baseNP}$
+
 \section{Maximum entropy}
+MaxEnt is typically used for a multi-class classifier.  We are given a set of training data, where each datum is labeled with a set of features and a class (tag).  Each feature-class pair constitutes an indicator function.  We train a classifier using this data, computing the αs.  We can then classify new data by selecting the class (tag) which maximizes $p(h ,t)$.
+
+MaxEnt models can be trained by providing a set of $K$ features in the form of binary-valued indicator functions $f_i (h, t)$.
+
+We will use a log-linear model, where $p(h, t) = (1/Z) \prod_{i=1}^K \alpha_i^{f_i(h, t)}$
+
+where $\alpha_i$ is the weight for feature $i$, and $Z$ is a normalizing constant.
+
+\subsection{Maximum Entropy Markov Models (MEMM)}
+
+Maximum entropy modeling can be combined with a Markov model, so that, for each state, the probability of a transition to that state is computed by a Max Ent model, based on the prior state and arbitrary features of the input sequence.  The result is a Maximum Entropy Markov Model (MEMM).  Decoding (selecting the best tag sequence) can be done deterministically left-to-right or (better) using Viterbi decoding like an HMM.
+
+\subsubsection{HMM vs MEMM}
+HMM is a generative model, while MEMM is a discriminative model.
+MEMM can incorporate long distance features.
+
+\subsection{Feature engineering}
+
+When using a package such as MaxEnt, the computational linguist's job becomes one of feature engineering -- identifying the features which will be most predictive of the tags we are trying to assign. Simple features are the current token (or the previous token, or the next token) having a particular value, or being on a particular list (such as a list of common titles or common first names).
+
+
 \section{Lexical semantics and word sense disambiguation}
+
+\subsection{Terminology}
+\begin{itemize}
+	\item multiple senses of a word
+	\item polysemy (and homonymy for totally unrelated senses ("bank"))
+	\item metonomy for certain types of regular, productive polysemy ("the White House", "Washington")
+	\item zeugma (conjunction combining distinct senses) as test for polysemy ("serve")
+	\item synonymy:  when two words mean (more-or-less) the same thing
+	\item hyponymy:  X is the hyponym of Y if X denotes a more specific subclass  of Y (X is the hyponym, Y is the hypernym)
+	\item synsets: synonym sets
+\end{itemize}
+
+\subsection{Word Sense Disambiguation}
+process of identifying the sense of a word in context
+
+Simple supervised WSD algorithm:  naive Bayes:
+
+$\text{selected sense s'} = argmax(sense s) P(s | F) = argmax(s) P(s) \prod_i P(f[i]|s)$ where $F = \{f1, f2, \cdots\}$ is the set of context features
+
+Training a naive Bayes classifier consists of estimating each of these probabilities.
+
+$P(s_i) = \frac{count(s_i, w_j)}{count(w_j)}$ \\
+Number of times the sense $s_i$ occurs in $w_j$ and divide by the total count of the target word $w_j$.
+
+$P(f_j|s) = \frac{count(f_j, s)}{count(s)}$
+
+\subsection{Word Embeddings}
+Word embeddings are low-dimensional (50-200 element) real vectors that encode information on the contexts in which a word appears. Each component of the vector combines information on multiple contexts.
+
+The embeddings can be produced by dimensionality reduction on the context matrix.
+\subsection{Information Content}
+
+$P(c)$: for each concept (synset), $P(c)$ = probability that a word in a corpus is an instance of the concept (matches the synset $c$ or one of its hyponyms)
+
+Information content of a concept
+$IC(c) = -\log P(c)$
+
+
 \section{Probabilistic CFG}
+
+Associate a probability with each production 
+\begin{itemize}
+	\item  sum of probabilities of productions expanding a symbol = 1
+	\item use MLE
+\end{itemize}
+
+$P(A \rightarrow \alpha) = count(A \rightarrow \alpha) /  \sum_{\beta} count(A | \beta )$ 
+
+Probability of parse = product of prob. of productions
+
 \section{Learning}
+
+\textbf{Supervised learning}: All training data is labeled \\
+
+\textbf{Semi-Supervised learning} \begin{itemize}
+	\item Part of training data is labeled
+	\item Make use of redundancies to learn labels of additional data, then train model
+	\item Co-training
+	\item Reduces amount of data which must be hand-labeled to achieve a given level of performance
+\end{itemize} 
+
+\textbf{Active learning}: 
+\begin{itemize}
+	\item Start with partially labeled data
+	\item System selects additional 'informative' examples for user to label
+\end{itemize}
+
+\textbf{Unsupervised learning}: driven entirely by an unlabeled corpus
+
+\textbf{Distant supervision}: given a large amount of tabular information, we use a heuristic procedure to (partially) label a text corpus.
+Distant supervision works roughly like a half iteration of bootstrapping, but with a large set of seeds. Given a data base with a large set of instances of a relation and a large raw text corpus, we use the instances to label the corpus and then train a classifier over the corpus.
+
+
+\textbf{Confidence of pattern P}:
+$Conf(P) = \frac{P.positive}{P.positive + P.negative}$
+where P.positive = number of positive matches to pattern P and P.negative = number of negative matches to pattern P
+
+
 \section{Reference resolution}
 Identify all phrases which refer to the same real-word entity.
 
@@ -212,50 +338,66 @@ Referent: real world object referred to
 
 Referring expression [mention]: a phrase referring to that object
 
+Discourse entities:  the set of objects referred to by a text
+
 Coreference: two expressions referring to the same thing.
 
 Antecedent: prior expression
 
 Anaphor: following expression
 
-Types of referring expressions: definite pronouns (he, she, it), indefinite pronouns (one), definite NPs (the car), indefinite NPs (a car).
+\textbf{Types of referring expressions}: definite pronouns (he, she, it), indefinite pronouns (one), definite NPs (the car), indefinite NPs (a car), names.
 
-Cataphora: pronoun referring to a following mention
+\textbf{Wikification}: entity linking, so map each document-level entity to an entry in a standard database as Wikipedia
 
-Bridging Anaphora: reference to related object
-
-Zero Anaphora: many languages allow subject omission, and some allow omission of other arguments
-
-Non-NP Anaphora: pronouns can also refer to events or propositions
-
-Wikification: entity linking, so map each document-level entity to an entry in a standard database as Wikipedia
-
+\subsection{Complications}
+\begin{itemize}
+	\item inferrables:  sometimes the relation between anaphor and antecedent is not one of identity
+	\item  zero Anaphora: many languages allow subject omission, and some allow omission of other arguments
+	\item Cataphora: pronoun referring to a following mention
+	\item Bridging Anaphora: reference to related object
+	\item Non-NP Anaphora: pronouns can also refer to events or propositions
+\end{itemize}
 
 \subsection{Hobbs search}
 In selecting which sentences to search, Hobbs starts with the sentence containing the anaphor and then selects prior sentences from right to left, examining first the immediately preceding sentence.
 However, within an individual sentence he searches from left to right;  this is the way he captures the preference for antecedents in subject position.
 The resulting search order defines a Hobbs distance:  if in searching for antecedents of $X$ the $d-th$ candidate we consider is $Y$, we say that the Hobbs distance from $X$ to $Y$ is $d$.
 
-\subsection{Constraints}
+\subsection{Resolving pronoun reference}
+Constraints:
 \begin{itemize}
 	\item animacy
 	\item gender
 	\item number
 \end{itemize}
 
-\subsection{Preferences}
+Preferences:
 \begin{itemize}
 	\item recent: at most 3 sentences back
 	\item salient: mentioned several times recently
 	\item subjects: 
 \end{itemize}
 
+Selectional preferences: prefer antecedent that is more likely to occur in context of pronoun.
 
-Ge, Hale, and Charniak formula:
-$P = P1( correct antecedent is at(Hobbs distance d) \times 
-P2( pronoun | head of antecedent) \times
-P3( antecedent | mention count) \times
-P4( head of antecedent | context of pronoun ) $
+\textbf{Ge, Hale, and Charniak formula}:
+$P = P1( \text{correct antecedent is at Hobbs distance d}) \times 
+P2( \text{pronoun} | \text{head of antecedent}) \times
+P3( \text{antecedent} | \text{mention count}) \times
+P4( \text{head of antecedent} | \text{context of pronoun} ) $
+
+\subsection{Models}
+\begin{itemize}
+	\item mention-pair model: train binary classifier
+		\begin{itemize}
+			\item scan mention in text order
+			\item link each mention to the closest antecedent classified
+			\item link each mention to antecedent most confidently labeled
+			\item cluster mentions
+		\end{itemize}
+	\item entity-mention model: uses information from all mentions gathered so far
+\end{itemize}
 
 
 \section{Question Answering}
